@@ -65,7 +65,8 @@ public class QuestionGenerator {
 	public static void main(String[] args) {
 			QuestionGenerator qg = new QuestionGenerator();
 			String[] records = {""};
-			qg.sentence = "Mike was arrested by Paul becuase Mike killed Jan";
+			// Example 1
+			qg.sentence = "Mike was arrested by Paul because Mike killed Jan";
 			qg.verb1 = "arrest";
 			qg.verb2 = "kill";
 			qg.Y1 = "Paul";
@@ -79,8 +80,13 @@ public class QuestionGenerator {
 			qg.x1_relation = relation.RECIPIENT;
 			qg.x2_relation = relation.AGENT;
 			qg.y_relation = relation.AGENT;
+			if(qg.processKnowledge()) {
+				System.out.println("* "+ qg.sentence);
+				System.out.println("Q: "+ qg.question);
+			}
 			
-			qg.sentence = "Mike was arrested by Paul becuase Mike was caught by Jan";
+			// Example 2
+			qg.sentence = "Mike was arrested by Paul because Mike was caught by Jan";
 			qg.verb1 = "arrest";
 			qg.verb2 = "catch";
 			qg.Y1 = "Paul";
@@ -94,6 +100,26 @@ public class QuestionGenerator {
 			qg.x1_relation = relation.RECIPIENT;
 			qg.x2_relation = relation.RECIPIENT;
 			qg.y_relation = relation.AGENT;
+			if(qg.processKnowledge()) {
+				System.out.println("* "+ qg.sentence);
+				System.out.println("Q: "+ qg.question);
+			}
+			
+			// Example 3
+			qg.sentence = "Jon needs to think about that some more because Jon usually likes to tweak them before sending";
+			qg.verb1 = "think";
+			qg.verb2 = "tweak";
+			qg.Y1 = "";
+			qg.X = "Jon";
+			qg.x1_index = 0;
+			qg.x2_index = 9;
+			qg.y1_index = -1;
+			qg.connective_index = 8;
+			qg.verb1_index = 3;
+			qg.verb2_index = 13;			
+			qg.x1_relation = relation.AGENT;
+			qg.x2_relation = relation.AGENT;
+			qg.y_relation = relation.NONE;
 			
 			qg.retrieveKonwledgeRecords();
 			//foreach record in records{
