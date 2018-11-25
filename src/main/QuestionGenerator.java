@@ -39,7 +39,21 @@ public class QuestionGenerator {
 			// get x1_index, x2_index, y1, y1_index (agent or recp according to x1_relation)
 			// Needs semantic_graph, verb1, verb2, x1_relation, x2_relation
 			extractSemanticRelation(gpn);
-
+			extractSemanticRelation(gpn);
+			/*
+			System.out.println(X);
+			System.out.println(x1_index);
+			System.out.println(X);
+			System.out.println(x2_index);
+			if(Y1 != "") {
+				System.out.println(Y1);
+				System.out.println(y1_index);
+			}
+			if(Y2 != "") {
+				System.out.println(Y2);
+				System.out.println(y2_index);	
+			}
+*/
 			if (!isPerson(X, gpn, x1_index))
 				return false;
 			if (!isPerson(Y1, gpn, y1_index))
@@ -173,7 +187,6 @@ public class QuestionGenerator {
 	private void extractSemanticRelation(GraphPassingNode gpn) {
 		// TODO Auto-generated method stub
 		for(String s : gpn.getAspGraph()){
-			//String split[] = s.split(",");
 			if(s.contains(verb1) && s.contains(x1_relation)) {
 				split = s.split("\\D+");
 				x1_index = Integer.parseInt(split[split.length-1])-1;
@@ -186,27 +199,43 @@ public class QuestionGenerator {
 				//System.out.println(X);
 				//System.out.println(x2_index);
 			}
-			else if(s.contains(verb1) && s.contains(y1_relation)) {
-				split = s.split("\\D+");
-				y1_index = Integer.parseInt(split[split.length-1])-1;
+			else if(s.contains(verb1) && s.contains("agent") || s.contains(verb1) && s.contains("recipient")) {
 				split = s.split(",");
 				split = split[split.length-1].split("-");
-				Y1 = split[0];
+				if(!split[0].equals(X)) {
+					Y1 = split[0].toLowerCase();
+					if(s.contains("agent")) {
+						y1_relation = "agent";
+					}
+					else {
+						y1_relation = "recipient";
+					}
+				}
+				split = s.split("\\D+");
+				y1_index = Integer.parseInt(split[split.length-1])-1;
 				//System.out.println(Y1);
 				//System.out.println(y1_index);
 			}
-			else if(s.contains(verb2) && s.contains(y2_relation)) {
-				split = s.split("\\D+");
-				y2_index = Integer.parseInt(split[split.length-1])-1;
+			else if(s.contains(verb2) && s.contains("agent") || s.contains(verb2) && s.contains("recipient")) {
 				split = s.split(",");
 				split = split[split.length-1].split("-");
-				Y2 = split[0];
-				//System.out.println(Y2);
-				//System.out.println(y2_index);
-
+				if(!split[0].equals(X)) {
+					Y2 = split[0].toLowerCase();
+					if(s.contains("agent")) {
+						y2_relation = "agent";
+					}
+					else {
+						y2_relation = "recipient";
+					}
+				}
+				split = s.split("\\D+");
+				y2_index = Integer.parseInt(split[split.length-1])-1;
+				//System.out.println(Y1);
+				//System.out.println(y1_index);
 			}
 
 		}
+		
 	}
 
 	private void extractKnowledge() {
