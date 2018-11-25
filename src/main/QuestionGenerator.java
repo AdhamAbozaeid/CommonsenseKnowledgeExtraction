@@ -13,7 +13,8 @@ public class QuestionGenerator {
 		RECIPIENT,
 	};
 	
-	protected String Y1;
+	private String Y1;
+	private String Y2;
 	private String X;
 	private String sentence;
 	private String question;
@@ -26,17 +27,18 @@ public class QuestionGenerator {
 	private int connective_index;
 	private int verb1_index;
 	private int verb2_index;
-	private relation x1_relation;
-	private relation x2_relation;
-	private relation y_relation;
+	private String x1_relation;
+	private String x2_relation;
+	private String y1_relation;
+	private String y2_relation;
 	private GraphPassingNode gpn;
-	
+	private String[] split;
 	public boolean processKnowledge() {
 		try {
 			SentenceParser sp = SentenceParser.getInstance();
 			
 			// Extract verb1, verb2, x1_relation, x2_relation
-			extractKnowledge(); 
+			extractKnowledge(gpn); 
 			
 			// Run parser on example sentence,
 			gpn = sp.parse(sentence);
@@ -77,9 +79,10 @@ public class QuestionGenerator {
 			qg.connective_index = 5;
 			qg.verb1_index = 2;
 			qg.verb2_index = 7;			
-			qg.x1_relation = relation.RECIPIENT;
-			qg.x2_relation = relation.AGENT;
-			qg.y_relation = relation.AGENT;
+			qg.x1_relation = "recipient";//relation.RECIPIENT;
+			qg.x2_relation = "agent";//relation.AGENT;
+			qg.y1_relation = "agent";//relation.AGENT;
+			qg.y2_relation = "agent";//relation.AGENT;
 			if(qg.processKnowledge()) {
 				System.out.println("* "+ qg.sentence);
 				System.out.println("Q: "+ qg.question);
@@ -97,9 +100,10 @@ public class QuestionGenerator {
 			qg.connective_index = 5;
 			qg.verb1_index = 2;
 			qg.verb2_index = 8;			
-			qg.x1_relation = relation.RECIPIENT;
-			qg.x2_relation = relation.RECIPIENT;
-			qg.y_relation = relation.AGENT;
+			qg.x1_relation = "recipient";//relation.RECIPIENT;
+			qg.x2_relation = "agent";//relation.AGENT;
+			qg.y1_relation = "agent";//relation.AGENT;
+			qg.y2_relation = "agent";//relation.AGENT;
 			if(qg.processKnowledge()) {
 				System.out.println("* "+ qg.sentence);
 				System.out.println("Q: "+ qg.question);
@@ -117,9 +121,10 @@ public class QuestionGenerator {
 			qg.connective_index = 8;
 			qg.verb1_index = 3;
 			qg.verb2_index = 13;			
-			qg.x1_relation = relation.AGENT;
-			qg.x2_relation = relation.AGENT;
-			qg.y_relation = relation.NONE;
+			qg.x1_relation = "recipient";//relation.RECIPIENT;
+			qg.x2_relation = "recipient";//relation.RECIPIENT;
+			qg.y1_relation = "agent";//relation.AGENT;
+			qg.y2_relation = "agent";//relation.AGENT;
 			
 			qg.retrieveKonwledgeRecords();
 			//foreach record in records{
@@ -137,16 +142,16 @@ public class QuestionGenerator {
 		tokens[x1_index] = "Tom";
 		tokens[x2_index] = "he";
 		
-		if(y_relation != relation.NONE)
+		if(y1_relation != null)
 			tokens[y1_index] = "John";
 		
 		sentence = "";
 		for(i=0; i<tokens.length; i++)
 			sentence += " "+tokens[i];
 		// Build question
-		if(x2_relation == relation.AGENT) {
+		if(x2_relation.equals("agent")) {
 			question = "who";
-		} else if(x2_relation == relation.RECIPIENT) {
+		} else if(x2_relation.equals("recipient")) {
 			question = "who was";
 		} else {
 			throw new Exception("Unknown X relation");
@@ -162,9 +167,43 @@ public class QuestionGenerator {
 		return true;
 	}
 	
-	private void extractSemanticRelation() {
+	private void extractSemanticRelation(GraphPassingNode gpn) {
 		// TODO Auto-generated method stub
-		
+		for(String s : gpn.getAspGraph()){
+			//String split[] = s.split(",");
+			if(s.contains(verb1) && s.contains(x1_relation)) {
+				split = s.split("\\D+");
+				x1_index = Integer.parseInt(split[split.length-1])-1;
+				//System.out.println(X);
+				//System.out.println(x1_index);
+			}
+			else if(s.contains(verb2) && s.contains(x2_relation)) {
+				split = s.split("\\D+");
+				x2_index = Integer.parseInt(split[split.length-1])-1;
+				//System.out.println(X);
+				//System.out.println(x2_index);
+			}
+			else if(s.contains(verb1) && s.contains(y1_relation)) {
+				split = s.split("\\D+");
+				y1_index = Integer.parseInt(split[split.length-1])-1;
+				split = s.split(",");
+				split = split[split.length-1].split("-");
+				Y1 = split[0];
+				//System.out.println(Y1);
+				//System.out.println(y1_index);
+			}
+			else if(s.contains(verb2) && s.contains(y2_relation)) {
+				split = s.split("\\D+");
+				y2_index = Integer.parseInt(split[split.length-1])-1;
+				split = s.split(",");
+				split = split[split.length-1].split("-");
+				Y2 = split[0];
+				//System.out.println(Y2);
+				//System.out.println(y2_index);
+
+			}
+
+		}
 	}
 
 	private void extractKnowledge() {
