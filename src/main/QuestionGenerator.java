@@ -39,7 +39,6 @@ public class QuestionGenerator {
 			// get x1_index, x2_index, y1, y1_index (agent or recp according to x1_relation)
 			// Needs semantic_graph, verb1, verb2, x1_relation, x2_relation
 			extractSemanticRelation(gpn);
-			extractSemanticRelation(gpn);
 			/*
 			System.out.println(X);
 			System.out.println(x1_index);
@@ -78,18 +77,18 @@ public class QuestionGenerator {
 		qg.sentence = "Mike was arrested by Paul because Mike killed Jan";
 		qg.verb1 = "arrest";
 		qg.verb2 = "kill";
-		qg.Y1 = "paul";
+		//qg.Y1 = "paul";
 		qg.X = "mike";
-		qg.x1_index = 0;
-		qg.x2_index = 6;
-		qg.y1_index = 4;
+		//qg.x1_index = 0;
+		//qg.x2_index = 6;
+		//qg.y1_index = 4;
 		//qg.connective_index = 5;
 		//qg.verb1_index = 2;
 		qg.verb2_index = 7;			
 		qg.x1_relation = "recipient";//relation.RECIPIENT;
 		qg.x2_relation = "agent";//relation.AGENT;
-		qg.y1_relation = "agent";//relation.AGENT;
-		qg.y2_relation = "agent";//relation.AGENT;
+		//qg.y1_relation = "agent";//relation.AGENT;
+		//qg.y2_relation = "agent";//relation.AGENT;
 		if(qg.processKnowledge()) {
 			System.out.println("* "+ qg.sentence);
 			System.out.println("Q: "+ qg.question);
@@ -99,18 +98,18 @@ public class QuestionGenerator {
 		qg.sentence = "Mike was arrested by Paul because Mike was caught by Jan";
 		qg.verb1 = "arrest";
 		qg.verb2 = "catch";
-		qg.Y1 = "paul";
+		//qg.Y1 = "paul";
 		qg.X = "mike";
-		qg.x1_index = 0;
-		qg.x2_index = 6;
-		qg.y1_index = 4;
+		//qg.x1_index = 0;
+		//qg.x2_index = 6;
+		//qg.y1_index = 4;
 		//qg.connective_index = 5;
 		//qg.verb1_index = 2;
 		qg.verb2_index = 8;			
 		qg.x1_relation = "recipient";//relation.RECIPIENT;
-		qg.x2_relation = "agent";//relation.AGENT;
-		qg.y1_relation = "agent";//relation.AGENT;
-		qg.y2_relation = "agent";//relation.AGENT;
+		qg.x2_relation = "recipient";//relation.AGENT;
+		//qg.y1_relation = "agent";//relation.AGENT;
+		//qg.y2_relation = "agent";//relation.AGENT;
 		if(qg.processKnowledge()) {
 			System.out.println("* "+ qg.sentence);
 			System.out.println("Q: "+ qg.question);
@@ -122,16 +121,16 @@ public class QuestionGenerator {
 		qg.verb2 = "tweak";
 		//qg.Y1 = null;
 		qg.X = "jon";
-		qg.x1_index = 0;
-		qg.x2_index = 9;
-		qg.y1_index = -1;
+		//qg.x1_index = 0;
+		//qg.x2_index = 9;
+		//qg.y1_index = -1;
 		//qg.connective_index = 8;
 		//qg.verb1_index = 3;
 		qg.verb2_index = 13;			
 		qg.x1_relation = "recipient";
 		qg.x2_relation = "recipient";
-		qg.y1_relation = "agent";
-		qg.y2_relation = "agent";
+		//qg.y1_relation = "agent";
+		//qg.y2_relation = "agent";
 
 		qg.retrieveKonwledgeRecords();
 		//foreach record in records{
