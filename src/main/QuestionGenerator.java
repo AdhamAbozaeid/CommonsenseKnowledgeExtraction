@@ -1,5 +1,7 @@
 package main;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.StringTokenizer;
 
 import methods.SentenceParser;
@@ -44,9 +46,9 @@ public class QuestionGenerator {
 			// Needs semantic_graph, verb1, verb2, x1_relation, x2_relation
 			extractSemanticRelation();
 			
-			if(!isPerson(X, gpn))
+			if (!isPerson(X, gpn, x1_index))
 				return false;
-			if(!isPerson(Y1, gpn))
+			if (!isPerson(Y1, gpn, y1_index))
 				y1_index = -1;
 			
 			//Needs x1_index, x2_index, x1_relation, x2_relation, y1_index, y1_relation
@@ -69,8 +71,8 @@ public class QuestionGenerator {
 			qg.sentence = "Mike was arrested by Paul because Mike killed Jan";
 			qg.verb1 = "arrest";
 			qg.verb2 = "kill";
-			qg.Y1 = "Paul";
-			qg.X = "Mike";
+			qg.Y1 = "paul";
+			qg.X = "mike";
 			qg.x1_index = 0;
 			qg.x2_index = 6;
 			qg.y1_index = 4;
@@ -89,8 +91,8 @@ public class QuestionGenerator {
 			qg.sentence = "Mike was arrested by Paul because Mike was caught by Jan";
 			qg.verb1 = "arrest";
 			qg.verb2 = "catch";
-			qg.Y1 = "Paul";
-			qg.X = "Mike";
+			qg.Y1 = "paul";
+			qg.X = "mike";
 			qg.x1_index = 0;
 			qg.x2_index = 6;
 			qg.y1_index = 4;
@@ -110,7 +112,7 @@ public class QuestionGenerator {
 			qg.verb1 = "think";
 			qg.verb2 = "tweak";
 			qg.Y1 = "";
-			qg.X = "Jon";
+			qg.X = "jon";
 			qg.x1_index = 0;
 			qg.x2_index = 9;
 			qg.y1_index = -1;
@@ -137,7 +139,7 @@ public class QuestionGenerator {
 		tokens[x1_index] = "Tom";
 		tokens[x2_index] = "he";
 		
-		if(y_relation != relation.NONE)
+		if(y_relation != relation.NONE && y1_index != -1)
 			tokens[y1_index] = "John";
 		
 		sentence = "";
@@ -157,9 +159,19 @@ public class QuestionGenerator {
 		question += "?";
 	}
 
-	private boolean isPerson(String entity, GraphPassingNode gpn) {
-		// TODO Auto-generated method stub
-		return true;
+	private boolean isPerson(String entity, GraphPassingNode gpn, int index) {
+		HashMap<String,ArrayList<String>> wordSenseMap = gpn.getWordSenseMap();
+		ArrayList<String> valueList;
+		index +=1;
+//		for(String s : gpn.getAspGraph()){
+//			System.out.println(s);
+//		}
+		valueList = wordSenseMap.get(entity+"_"+index);
+		if(valueList == null)
+			return false;
+		if(valueList.get(1) == null)
+			return false;
+		return valueList.get(1).contains("person");
 	}
 	
 	private void extractSemanticRelation() {
