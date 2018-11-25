@@ -84,7 +84,7 @@ public class QuestionGenerator {
 		//qg.y1_index = 4;
 		//qg.connective_index = 5;
 		//qg.verb1_index = 2;
-		qg.verb2_index = 7;			
+		//qg.verb2_index = 7;			
 		qg.x1_relation = "recipient";//relation.RECIPIENT;
 		qg.x2_relation = "agent";//relation.AGENT;
 		//qg.y1_relation = "agent";//relation.AGENT;
@@ -105,7 +105,7 @@ public class QuestionGenerator {
 		//qg.y1_index = 4;
 		//qg.connective_index = 5;
 		//qg.verb1_index = 2;
-		qg.verb2_index = 8;			
+		//qg.verb2_index = 8;			
 		qg.x1_relation = "recipient";//relation.RECIPIENT;
 		qg.x2_relation = "recipient";//relation.AGENT;
 		//qg.y1_relation = "agent";//relation.AGENT;
@@ -126,7 +126,7 @@ public class QuestionGenerator {
 		//qg.y1_index = -1;
 		//qg.connective_index = 8;
 		//qg.verb1_index = 3;
-		qg.verb2_index = 13;			
+		//qg.verb2_index = 13;			
 		qg.x1_relation = "recipient";
 		qg.x2_relation = "recipient";
 		//qg.y1_relation = "agent";
@@ -195,8 +195,8 @@ public class QuestionGenerator {
 			else if(s.contains(verb2) && s.contains(x2_relation)) {
 				split = s.split("\\D+");
 				x2_index = Integer.parseInt(split[split.length-1])-1;
-				//System.out.println(X);
-				//System.out.println(x2_index);
+				verb2_index = Integer.parseInt(split[split.length-2])-1;
+				//System.out.println(verb2_index);
 			}
 			else if(s.contains(verb1) && s.contains("agent") || s.contains(verb1) && s.contains("recipient")) {
 				split = s.split(",");
@@ -247,3 +247,4 @@ public class QuestionGenerator {
 
 	}
 }
+
