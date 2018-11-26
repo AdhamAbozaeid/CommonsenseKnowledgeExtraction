@@ -75,9 +75,10 @@ public class QuestionGenerator {
 			x1_relation = "agent";
 		} else if (s1hasrecp == true) {
 			x1_relation = "recipient";
-		} else if (s2hasagent == true) {
+		}
+		if (s2hasagent == true) {
 			x2_relation = "agent";
-		} else if (s1hasrecp == true) {
+		} else if (s2hasrecp == true) {
 			x2_relation = "recipient";
 		}
 	}
