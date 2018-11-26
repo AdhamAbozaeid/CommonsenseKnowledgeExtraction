@@ -32,7 +32,8 @@ public class QuestionGenerator {
 			SentenceParser sp = SentenceParser.getInstance();
 
 			// Extract verb1, verb2, x1_relation, x2_relation
-			extractKnowledge(doc);
+			if (doc != null)
+				extractKnowledge(doc);
 
 			// Run parser on example sentence,
 			gpn = sp.parse(sentence);
@@ -130,7 +131,7 @@ public class QuestionGenerator {
 			if (s.contains(verb1) && s.contains(x1_relation)) {
 				split = s.split("\\D+");
 				x1_index = Integer.parseInt(split[split.length - 1]) - 1;
-				
+
 				split = s.split(",");
 				split = split[split.length - 1].split("-");
 				X = split[0].toLowerCase();
@@ -179,7 +180,9 @@ public class QuestionGenerator {
 
 	public static void main(String[] args) {
 		QuestionGenerator qg = new QuestionGenerator();
-		// testExamples();
+
+//		qg.testExamples();
+
 		try {
 			FindIterable<Document> docs = qg.retrieveKonwledgeRecords();
 
@@ -218,65 +221,68 @@ public class QuestionGenerator {
 
 	@SuppressWarnings("unused")
 	private void testExamples() {
-		// String[] records = {""};
-		// // Example 1
-		// qg.sentence = "Mike was arrested by Paul because Mike killed Jan";
-		// qg.verb1 = "arrest";
-		// qg.verb2 = "kill";
-		// //qg.Y1 = "paul";
-		// qg.X = "mike";
-		// //qg.x1_index = 0;
-		// //qg.x2_index = 6;
-		// //qg.y1_index = 4;
-		// //qg.connective_index = 5;
-		// //qg.verb1_index = 2;
-		// //qg.verb2_index = 7;
-		// qg.x1_relation = "recipient";//relation.RECIPIENT;
-		// qg.x2_relation = "agent";//relation.AGENT;
-		// //qg.y1_relation = "agent";//relation.AGENT;
-		// //qg.y2_relation = "agent";//relation.AGENT;
-		// if(qg.processKnowledge()) {
-		// System.out.println("* "+ qg.sentence);
-		// System.out.println("Q: "+ qg.question);
-		// }
-		//
-		// // Example 2
-		// qg.sentence = "Mike was arrested by Paul because Mike was caught by Jan";
-		// qg.verb1 = "arrest";
-		// qg.verb2 = "catch";
-		// //qg.Y1 = "paul";
-		// qg.X = "mike";
-		// //qg.x1_index = 0;
-		// //qg.x2_index = 6;
-		// //qg.y1_index = 4;
-		// //qg.connective_index = 5;
-		// //qg.verb1_index = 2;
-		// //qg.verb2_index = 8;
-		// qg.x1_relation = "recipient";//relation.RECIPIENT;
-		// qg.x2_relation = "recipient";//relation.AGENT;
-		// //qg.y1_relation = "agent";//relation.AGENT;
-		// //qg.y2_relation = "agent";//relation.AGENT;
-		// if(qg.processKnowledge()) {
-		// System.out.println("* "+ qg.sentence);
-		// System.out.println("Q: "+ qg.question);
-		// }
-		//
-		// // Example 3
-		// qg.sentence = "Jon needs to think about that some more because Jon usually
-		// likes to tweak them before sending";
-		// qg.verb1 = "think";
-		// qg.verb2 = "tweak";
-		// //qg.Y1 = null;
-		// qg.X = "jon";
-		// //qg.x1_index = 0;
-		// //qg.x2_index = 9;
-		// //qg.y1_index = -1;
-		// //qg.connective_index = 8;
-		// //qg.verb1_index = 3;
-		// //qg.verb2_index = 13;
-		// qg.x1_relation = "recipient";
-		// qg.x2_relation = "recipient";
-		// //qg.y1_relation = "agent";
-		// //qg.y2_relation = "agent";
+		String[] records = { "" };
+		// Example 1
+		sentence = "Mike was arrested by Paul because Mike killed Jan";
+		verb1 = "arrest";
+		verb2 = "kill";
+		// qg.Y1 = "paul";
+		X = "mike";
+		// qg.x1_index = 0;
+		// qg.x2_index = 6;
+		// qg.y1_index = 4;
+		// qg.connective_index = 5;
+		// qg.verb1_index = 2;
+		// qg.verb2_index = 7;
+		x1_relation = "recipient";
+		x2_relation = "agent";
+		// qg.y1_relation = "agent";
+		// qg.y2_relation = "agent";
+		if (processKnowledge(null)) {
+			System.out.println("* " + sentence);
+			System.out.println("Q: " + question);
+		}
+
+		// Example 2
+		sentence = "Mike was arrested by Paul because Mike was caught by Jan";
+		verb1 = "arrest";
+		verb2 = "catch";
+		// qg.Y1 = "paul";
+		X = "mike";
+		// qg.x1_index = 0;
+		// qg.x2_index = 6;
+		// qg.y1_index = 4;
+		// qg.connective_index = 5;
+		// qg.verb1_index = 2;
+		// qg.verb2_index = 8;
+		x1_relation = "recipient";
+		x2_relation = "recipient";
+		// qg.y1_relation = "agent";
+		// qg.y2_relation = "agent";
+		if (processKnowledge(null)) {
+			System.out.println("* " + sentence);
+			System.out.println("Q: " + question);
+		}
+
+		// Example 3
+		sentence = "Jon needs to think about that some more because Jon usually likes to tweak them before sending";
+		verb1 = "think";
+		verb2 = "tweak";
+		// qg.Y1 = null;
+		X = "jon";
+		// qg.x1_index = 0;
+		// qg.x2_index = 9;
+		// qg.y1_index = -1;
+		// qg.connective_index = 8;
+		// qg.verb1_index = 3;
+		// qg.verb2_index = 13;
+		x1_relation = "recipient";
+		x2_relation = "recipient";
+		// qg.y1_relation = "agent";
+		// qg.y2_relation = "agent";
+		if (processKnowledge(null)) {
+			System.out.println("* " + sentence);
+			System.out.println("Q: " + question);
+		}
 	}
 }
