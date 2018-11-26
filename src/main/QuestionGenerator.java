@@ -130,6 +130,10 @@ public class QuestionGenerator {
 			if (s.contains(verb1) && s.contains(x1_relation)) {
 				split = s.split("\\D+");
 				x1_index = Integer.parseInt(split[split.length - 1]) - 1;
+				
+				split = s.split(",");
+				split = split[split.length - 1].split("-");
+				X = split[0].toLowerCase();
 				// System.out.println(X);
 				// System.out.println(x1_index);
 			} else if (s.contains(verb2) && s.contains(x2_relation)) {
@@ -183,6 +187,7 @@ public class QuestionGenerator {
 				if (qg.processKnowledge(doc)) {
 					System.out.println("* " + qg.sentence);
 					System.out.println("Q: " + qg.question);
+					break;
 				}
 			}
 		} catch (JSONException e) {
