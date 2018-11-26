@@ -26,14 +26,13 @@ public class QuestionGenerator {
 	private boolean s1hasagent, s1hasrecp, s2hasagent, s2hasrecp;
 	private GraphPassingNode gpn;
 	private String[] split;
-	private static SentenceParser spa = new SentenceParser();
 	
-	public boolean processKnowledge() {
+	public boolean processKnowledge(Document doc) {
 		try {
 			SentenceParser sp = SentenceParser.getInstance();
 
 			// Extract verb1, verb2, x1_relation, x2_relation
-			//extractKnowledge(); 	This method no longer exists as the work for it is done in retrieveKonwledgeRecords itself
+			extractKnowledge(doc);
 
 			// Run parser on example sentence,
 			gpn = sp.parse(sentence);
@@ -71,6 +70,29 @@ public class QuestionGenerator {
 		return true;
 	}
 	
+	private void extractKnowledge(Document doc) throws JSONException {
+		JSONObject d = new JSONObject(doc.toJson());
+		s1hasagent = d.getJSONObject("knowledge").has("agent");
+		s1hasrecp = d.getJSONObject("knowledge").has("recipient");
+		verb1 = d.getJSONObject("knowledge").getString("value");
+		s2hasagent = d.getJSONObject("knowledge").getJSONObject("causes").has("agent");
+		s2hasrecp = d.getJSONObject("knowledge").getJSONObject("causes").has("recipient");
+		verb2 = d.getJSONObject("knowledge").getJSONObject("causes").getString("value");
+		sentence = (String) d.getJSONArray("texts").get(0);
+		if(s1hasagent == true) {
+			x1_relation = "agent";
+		}
+		else if(s1hasrecp == true) {
+			x1_relation = "recipient";
+		}
+		else if(s2hasagent == true) {
+			x2_relation = "agent";
+		}
+		else if(s1hasrecp == true) {
+			x2_relation = "recipient";
+		}
+	}
+
 	private void modifySentence() throws Exception {
 		int i;
 		String[] tokens = sentence.split(" ");
@@ -166,105 +188,24 @@ public class QuestionGenerator {
 		
 	}
 	
-//	public void generateSentence(Boolean a1, Boolean r1, String v1, Boolean a2, Boolean r2, String v2, String text) {
-//		GraphPassingNode gpn = spa.parsedSentence(text);
-//		Map<String, GetDetails> map = new HashMap<>();
-//		
-//		for(String s : gpn.getAspGraph()){
-//			System.out.println(s);
-//			GetDetails temp = new GetDetails(s);
-//			if(!map.containsKey(temp.head)) {
-//				map.put(temp.head, temp);
-//			} else {
-//				GetDetails deep = map.get(temp.head);
-//				deep.addTailRelation(temp);
-//				map.put(temp.head, deep);
-//			}
-//		}
-//		String startTail = map.get(v1).tail.get(map.get(v1).agentIndex);
-//		int startTailIndex = map.get(v1).tailI.get(map.get(v1).agentIndex);
-//		System.out.println(startTail + "-" + startTailIndex);
-//		for(String str : map.get(v1).getTailsByIndex(startTailIndex)) {
-//			System.out.println(str);
-//		}
-//
-//	}
-
-	public static void main(String[] args) throws JSONException {
+		public static void main(String[] args) {
 		QuestionGenerator qg = new QuestionGenerator();
+		//testExamples();
+		try {
+			FindIterable<Document> docs = qg.retrieveKonwledgeRecords();
 		
-		qg.retrieveKonwledgeRecords();
-		
-//		String[] records = {""};
-//		// Example 1
-//		qg.sentence = "Mike was arrested by Paul because Mike killed Jan";
-//		qg.verb1 = "arrest";
-//		qg.verb2 = "kill";
-//		//qg.Y1 = "paul";
-//		qg.X = "mike";
-//		//qg.x1_index = 0;
-//		//qg.x2_index = 6;
-//		//qg.y1_index = 4;
-//		//qg.connective_index = 5;
-//		//qg.verb1_index = 2;
-//		//qg.verb2_index = 7;			
-//		qg.x1_relation = "recipient";//relation.RECIPIENT;
-//		qg.x2_relation = "agent";//relation.AGENT;
-//		//qg.y1_relation = "agent";//relation.AGENT;
-//		//qg.y2_relation = "agent";//relation.AGENT;
-//		if(qg.processKnowledge()) {
-//			System.out.println("* "+ qg.sentence);
-//			System.out.println("Q: "+ qg.question);
-//		}
-//
-//		// Example 2
-//		qg.sentence = "Mike was arrested by Paul because Mike was caught by Jan";
-//		qg.verb1 = "arrest";
-//		qg.verb2 = "catch";
-//		//qg.Y1 = "paul";
-//		qg.X = "mike";
-//		//qg.x1_index = 0;
-//		//qg.x2_index = 6;
-//		//qg.y1_index = 4;
-//		//qg.connective_index = 5;
-//		//qg.verb1_index = 2;
-//		//qg.verb2_index = 8;			
-//		qg.x1_relation = "recipient";//relation.RECIPIENT;
-//		qg.x2_relation = "recipient";//relation.AGENT;
-//		//qg.y1_relation = "agent";//relation.AGENT;
-//		//qg.y2_relation = "agent";//relation.AGENT;
-//		if(qg.processKnowledge()) {
-//			System.out.println("* "+ qg.sentence);
-//			System.out.println("Q: "+ qg.question);
-//		}
-//
-//		// Example 3
-//		qg.sentence = "Jon needs to think about that some more because Jon usually likes to tweak them before sending";
-//		qg.verb1 = "think";
-//		qg.verb2 = "tweak";
-//		//qg.Y1 = null;
-//		qg.X = "jon";
-//		//qg.x1_index = 0;
-//		//qg.x2_index = 9;
-//		//qg.y1_index = -1;
-//		//qg.connective_index = 8;
-//		//qg.verb1_index = 3;
-//		//qg.verb2_index = 13;			
-//		qg.x1_relation = "recipient";
-//		qg.x2_relation = "recipient";
-//		//qg.y1_relation = "agent";
-//		//qg.y2_relation = "agent";
-
-		//foreach record in records{
-//		for (String record : records) {
-//			if(qg.processKnowledge()) {
-//				System.out.println("* "+ qg.sentence);
-//				System.out.println("Q: "+ qg.question);
-//			}
-//		}
+			for (Document doc : docs) {
+				if(qg.processKnowledge(doc)) {
+					System.out.println("* "+ qg.sentence);
+					System.out.println("Q: "+ qg.question);
+				}
+			}
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
 	}
 
-	private void retrieveKonwledgeRecords() throws JSONException {
+	private FindIterable<Document> retrieveKonwledgeRecords() throws JSONException {
 		QuestionGenerator qg = new QuestionGenerator();
 		
 		int port_no = 27017;
@@ -274,39 +215,9 @@ public class QuestionGenerator {
 		MongoClient mongo_client = new MongoClient(uri);
 		MongoDatabase db = mongo_client.getDatabase(db_name);
 		MongoCollection<Document> coll = db.getCollection(db_coll_name);
-		
-		int i = 0;
+
 		FindIterable<Document> docs = qg.findKnowledgeInKB(coll);
-		// For final code, remove everything with variable i (In short, remove the if blocks in below for loop)
-		for (Document doc : docs) {
-			if(i!=1) {
-				JSONObject d = new JSONObject(doc.toJson());
-				s1hasagent = d.getJSONObject("knowledge").has("agent");
-				s1hasrecp = d.getJSONObject("knowledge").has("recipient");
-				verb1 = d.getJSONObject("knowledge").getString("value");
-				s2hasagent = d.getJSONObject("knowledge").getJSONObject("causes").has("agent");
-				s2hasrecp = d.getJSONObject("knowledge").getJSONObject("causes").has("recipient");
-				verb2 = d.getJSONObject("knowledge").getJSONObject("causes").getString("value");
-				sentence = (String) d.getJSONArray("texts").get(0);
-				if(s1hasagent == true) {
-					x1_relation = "agent";
-				}
-				else if(s1hasrecp == true) {
-					x1_relation = "recipient";
-				}
-				else if(s2hasagent == true) {
-					x2_relation = "agent";
-				}
-				else if(s1hasrecp == true) {
-					x2_relation = "recipient";
-				}
-				processKnowledge();
-			}
-			else {
-				break;
-			}
-			i++;
-		}
+		return docs;
 
 	}
 	
@@ -315,9 +226,66 @@ public class QuestionGenerator {
 		return docs;
 	}
 
-	// Work for this method is done in extractKnowledge method. This can be removed.
-//	private void retrieveKonwledgeRecords() {
-//		// TODO Auto-generated method stub
-//
-//	}
+	@SuppressWarnings("unused")
+	private void testExamples() {
+		//		String[] records = {""};
+		//		// Example 1
+		//		qg.sentence = "Mike was arrested by Paul because Mike killed Jan";
+		//		qg.verb1 = "arrest";
+		//		qg.verb2 = "kill";
+		//		//qg.Y1 = "paul";
+		//		qg.X = "mike";
+		//		//qg.x1_index = 0;
+		//		//qg.x2_index = 6;
+		//		//qg.y1_index = 4;
+		//		//qg.connective_index = 5;
+		//		//qg.verb1_index = 2;
+		//		//qg.verb2_index = 7;			
+		//		qg.x1_relation = "recipient";//relation.RECIPIENT;
+		//		qg.x2_relation = "agent";//relation.AGENT;
+		//		//qg.y1_relation = "agent";//relation.AGENT;
+		//		//qg.y2_relation = "agent";//relation.AGENT;
+		//		if(qg.processKnowledge()) {
+		//			System.out.println("* "+ qg.sentence);
+		//			System.out.println("Q: "+ qg.question);
+		//		}
+		//
+		//		// Example 2
+		//		qg.sentence = "Mike was arrested by Paul because Mike was caught by Jan";
+		//		qg.verb1 = "arrest";
+		//		qg.verb2 = "catch";
+		//		//qg.Y1 = "paul";
+		//		qg.X = "mike";
+		//		//qg.x1_index = 0;
+		//		//qg.x2_index = 6;
+		//		//qg.y1_index = 4;
+		//		//qg.connective_index = 5;
+		//		//qg.verb1_index = 2;
+		//		//qg.verb2_index = 8;			
+		//		qg.x1_relation = "recipient";//relation.RECIPIENT;
+		//		qg.x2_relation = "recipient";//relation.AGENT;
+		//		//qg.y1_relation = "agent";//relation.AGENT;
+		//		//qg.y2_relation = "agent";//relation.AGENT;
+		//		if(qg.processKnowledge()) {
+		//			System.out.println("* "+ qg.sentence);
+		//			System.out.println("Q: "+ qg.question);
+		//		}
+		//
+		//		// Example 3
+		//		qg.sentence = "Jon needs to think about that some more because Jon usually likes to tweak them before sending";
+		//		qg.verb1 = "think";
+		//		qg.verb2 = "tweak";
+		//		//qg.Y1 = null;
+		//		qg.X = "jon";
+		//		//qg.x1_index = 0;
+		//		//qg.x2_index = 9;
+		//		//qg.y1_index = -1;
+		//		//qg.connective_index = 8;
+		//		//qg.verb1_index = 3;
+		//		//qg.verb2_index = 13;			
+		//		qg.x1_relation = "recipient";
+		//		qg.x2_relation = "recipient";
+		//		//qg.y1_relation = "agent";
+		//		//qg.y2_relation = "agent";
+	}
 }
