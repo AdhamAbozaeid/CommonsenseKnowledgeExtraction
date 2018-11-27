@@ -10,6 +10,9 @@ import com.mongodb.client.model.Filters;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.*;
 
 import org.bson.Document;
@@ -225,26 +228,35 @@ public class QuestionGenerator {
 
 	public static void main(String[] args) {
 		QuestionGenerator qg = new QuestionGenerator();
+		BufferedWriter bw = null;
 
-		qg.testExamples();
+//		qg.testExamples();
 //		qg.printSemantic("Jon needs to think about that some more because Jon usually likes to tweak them before sending");
 //		qg.printSemantic("Mike was arrested by Paul because Mike was caught by Jan");
 
-//		try {
-//			FindIterable<Document> docs = qg.retrieveKonwledgeRecords();
-//
-//			for (Document doc : docs) {
-//				if (qg.processKnowledge(doc)) {
-//					System.out.println("* " + qg.sentence);
-//					System.out.println("Q: " + qg.question);
-//				} else {
-//					System.out.println("failed to process knowledge");
-//				}
-//			}
-//		} catch (JSONException e) {
-//			e.printStackTrace();
-//		}
-//		qg.mongo_client.close();
+		try {
+			bw = new BufferedWriter(new FileWriter("Gen_Q.txt", false));
+			FindIterable<Document> docs = qg.retrieveKonwledgeRecords();
+
+			for (Document doc : docs) {
+				if (qg.processKnowledge(doc)) {
+					System.out.println("* " + qg.sentence);
+					System.out.println("Q: " + qg.question);
+					bw.write("* " + qg.sentence);
+					bw.newLine();
+					bw.write("Q: " + qg.question);
+					bw.newLine();
+					bw.newLine();
+					bw.flush();
+				} else {
+					System.out.println("failed to process knowledge");
+				}
+			}
+			bw.close();
+		} catch (JSONException | IOException e) {
+			e.printStackTrace();
+		}
+		qg.mongo_client.close();
 	}
 
 	private FindIterable<Document> retrieveKonwledgeRecords() throws JSONException {
