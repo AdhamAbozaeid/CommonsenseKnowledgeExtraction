@@ -21,13 +21,11 @@ public class QuestionGenerator {
 
 	private String Y1, Y2, X, sentence, question, verb1, verb2, x1_relation, x2_relation, y1_relation, y2_relation;
 	private int x1_index, x2_index, y1_index, y2_index, verb2_index;
-	private boolean s1hasagent, s1hasrecp, s2hasagent, s2hasrecp;
-	private GraphPassingNode gpn;
-	private String[] split;
 	MongoClient mongo_client;
 
 	public boolean processKnowledge(Document doc) {
 		try {
+			GraphPassingNode gpn;
 			SentenceParser sp = SentenceParser.getInstance();
 
 			// Extract verb1, verb2, x1_relation, x2_relation
@@ -70,7 +68,9 @@ public class QuestionGenerator {
 	}
 
 	private boolean extractKnowledge(Document doc) throws JSONException {
+		boolean s1hasagent, s1hasrecp, s2hasagent, s2hasrecp;
 		JSONObject d = new JSONObject(doc.toJson());
+
 		s1hasagent = d.getJSONObject("knowledge").has("agent");
 		s1hasrecp = d.getJSONObject("knowledge").has("recipient");
 		verb1 = d.getJSONObject("knowledge").getString("value");
@@ -138,6 +138,8 @@ public class QuestionGenerator {
 	}
 
 	private boolean extractSemanticRelation(GraphPassingNode gpn) {
+		String[] split;
+
 		x1_index = -1;
 		x2_index = -1;
 		verb2_index = -1;
