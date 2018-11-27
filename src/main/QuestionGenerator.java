@@ -182,6 +182,8 @@ public class QuestionGenerator {
 		QuestionGenerator qg = new QuestionGenerator();
 
 //		qg.testExamples();
+//		qg.printSemantic("Jon needs to think about that some more because Jon usually likes to tweak them before sending");
+//		qg.printSemantic("Mike was arrested by Paul because Mike was caught by Jan");
 
 		try {
 			FindIterable<Document> docs = qg.retrieveKonwledgeRecords();
@@ -247,18 +249,9 @@ public class QuestionGenerator {
 		sentence = "Mike was arrested by Paul because Mike was caught by Jan";
 		verb1 = "arrest";
 		verb2 = "catch";
-		// qg.Y1 = "paul";
 		X = "mike";
-		// qg.x1_index = 0;
-		// qg.x2_index = 6;
-		// qg.y1_index = 4;
-		// qg.connective_index = 5;
-		// qg.verb1_index = 2;
-		// qg.verb2_index = 8;
 		x1_relation = "recipient";
 		x2_relation = "recipient";
-		// qg.y1_relation = "agent";
-		// qg.y2_relation = "agent";
 		if (processKnowledge(null)) {
 			System.out.println("* " + sentence);
 			System.out.println("Q: " + question);
@@ -285,4 +278,18 @@ public class QuestionGenerator {
 			System.out.println("Q: " + question);
 		}
 	}
+	
+	private void printSemantic(String sentence) {
+		SentenceParser sp = SentenceParser.getInstance();
+		GraphPassingNode graphNode = sp.parse(sentence);
+		for(String s : graphNode.getAspGraph()){
+			System.out.println(s);
+		}
+		System.out.println("\n\n*********\nWordSene Graph\n*********");
+		HashMap<String, ArrayList<String>> wordSenseMap = graphNode.getWordSenseMap();
+		//wordSenseMap.entrySet()
+		for(Map.Entry<String, ArrayList<String>> entry: wordSenseMap.entrySet())
+			System.out.println(entry.getKey() + "=" + entry.getValue());
+	}
+	
 }
