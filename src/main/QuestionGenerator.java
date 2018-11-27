@@ -26,7 +26,6 @@ public class QuestionGenerator {
 	private boolean s1hasagent, s1hasrecp, s2hasagent, s2hasrecp;
 	private GraphPassingNode gpn;
 	private String[] split;
-	MongoClient mongo_client;
 
 	public boolean processKnowledge(Document doc) {
 		try {
@@ -34,7 +33,8 @@ public class QuestionGenerator {
 
 			// Extract verb1, verb2, x1_relation, x2_relation
 			if (doc != null)
-				extractKnowledge(doc);
+				if (!extractKnowledge(doc))
+					return false;
 
 			// Run parser on example sentence,
 			gpn = sp.parse(sentence);
@@ -64,7 +64,7 @@ public class QuestionGenerator {
 		return true;
 	}
 
-	private void extractKnowledge(Document doc) throws JSONException {
+	private boolean extractKnowledge(Document doc) throws JSONException {
 		JSONObject d = new JSONObject(doc.toJson());
 		s1hasagent = d.getJSONObject("knowledge").has("agent");
 		s1hasrecp = d.getJSONObject("knowledge").has("recipient");
@@ -77,12 +77,16 @@ public class QuestionGenerator {
 			x1_relation = "agent";
 		} else if (s1hasrecp == true) {
 			x1_relation = "recipient";
-		}
+		} else
+			return false;
 		if (s2hasagent == true) {
 			x2_relation = "agent";
 		} else if (s2hasrecp == true) {
 			x2_relation = "recipient";
-		}
+		} else
+			return false;
+
+		return true;
 	}
 
 	private void modifySentence() throws Exception {
@@ -208,7 +212,7 @@ public class QuestionGenerator {
 		String host_name = "localhost", db_name = "knetdb", db_coll_name = "maintable";
 		String client_url = "mongodb://" + host_name + ":" + port_no + "/" + db_name;
 		MongoClientURI uri = new MongoClientURI(client_url);
-		mongo_client = new MongoClient(uri);
+		MongoClient mongo_client = new MongoClient(uri);
 		MongoDatabase db = mongo_client.getDatabase(db_name);
 		MongoCollection<Document> coll = db.getCollection(db_coll_name);
 
@@ -279,18 +283,18 @@ public class QuestionGenerator {
 			System.out.println("Q: " + question);
 		}
 	}
-	
+
 	private void printSemantic(String sentence) {
 		SentenceParser sp = SentenceParser.getInstance();
 		GraphPassingNode graphNode = sp.parse(sentence);
-		for(String s : graphNode.getAspGraph()){
+		for (String s : graphNode.getAspGraph()) {
 			System.out.println(s);
 		}
 		System.out.println("\n\n*********\nWordSene Graph\n*********");
 		HashMap<String, ArrayList<String>> wordSenseMap = graphNode.getWordSenseMap();
-		//wordSenseMap.entrySet()
-		for(Map.Entry<String, ArrayList<String>> entry: wordSenseMap.entrySet())
+		// wordSenseMap.entrySet()
+		for (Map.Entry<String, ArrayList<String>> entry : wordSenseMap.entrySet())
 			System.out.println(entry.getKey() + "=" + entry.getValue());
 	}
-	
+
 }
