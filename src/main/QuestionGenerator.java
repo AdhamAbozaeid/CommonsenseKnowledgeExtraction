@@ -23,7 +23,7 @@ public class QuestionGenerator {
 	// Need to declare the variables that Ananta is using in extractKnowledge below
 
 	private String Y1, Y2, X, sentence, question, verb1, verb2, x1_relation, x2_relation, y1_relation, y2_relation;
-	private int x1_index, x2_index, y1_index, y2_index, verb2_index;
+	private int x1_index, x2_index, y1_index, y2_index, verb1_index, verb2_index;
 	MongoClient mongo_client;
 
 	public boolean processKnowledge(Document doc) {
@@ -68,6 +68,16 @@ public class QuestionGenerator {
 			return false;
 		}
 		return true;
+	}
+
+	private void swapKnowledge() {
+		String temp = verb1;
+		verb1 = verb2;
+		verb2 = temp;
+		
+		temp = x1_relation;
+		x1_relation = x2_relation;
+		x2_relation = temp;
 	}
 
 	private boolean extractKnowledge(Document doc) throws JSONException {
@@ -127,7 +137,6 @@ public class QuestionGenerator {
 	}
 
 	private boolean isPerson(String entity, GraphPassingNode gpn, int index) {
-		HashMap<String, ArrayList<String>> wordSenseMap = gpn.getWordSenseMap();
 		ClassesResource cr = gpn.getConClassRes();
 		HashMap<String, String> sm = cr.getSuperclassesMap();
 		index++;
@@ -148,6 +157,7 @@ public class QuestionGenerator {
 
 		x1_index = -1;
 		x2_index = -1;
+		verb1_index = -1;
 		verb2_index = -1;
 		X = null;
 		Y1 = null;
@@ -158,6 +168,7 @@ public class QuestionGenerator {
 			if (s.contains(verb1) && s.contains("instance_of")) {
 				split = s.split(",");
 				split = split[0].split("-");
+				verb1_index = Integer.parseInt(split[split.length - 1]) - 1;
 				split = split[0].split("\\(");
 				verb1 = split[split.length - 1];
 			}
@@ -169,6 +180,15 @@ public class QuestionGenerator {
 				verb2 = split[split.length - 1];
 			}
 		}
+		if(verb1_index > verb2_index)
+		{
+			int temp;
+			swapKnowledge();
+			temp = verb1_index;
+			verb1_index = verb2_index;
+			verb2_index = temp;
+		}
+
 		for (String s : gpn.getAspGraph()) {
 			if (s.contains(verb1) && s.contains(x1_relation)) {
 				split = s.split("\\D+");
@@ -218,7 +238,7 @@ public class QuestionGenerator {
 		}
 
 		/* Validate extracted parameters */
-		if (x1_index == -1 || x2_index == -1 || verb2_index == -1 || X == null)
+		if (x1_index == -1 || x2_index == -1 || verb1_index == -1 || verb2_index == -1 || X == null)
 			return false;
 		if (Y1 != null && y1_relation == null)
 			return false;
