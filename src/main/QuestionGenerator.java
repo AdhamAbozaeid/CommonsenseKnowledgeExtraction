@@ -160,9 +160,8 @@ public class QuestionGenerator {
 			}
 			if (s.contains(verb2) && s.contains("instance_of")) {
 				split = s.split(",");
-				System.out.println(verb2);
 				split = split[0].split("-");
-				verb2_index = Integer.parseInt(split[split.length - 1]);
+				verb2_index = Integer.parseInt(split[split.length - 1])-1;
 				split = split[0].split("\\(");
 				verb2 = split[split.length - 1];
 			}
