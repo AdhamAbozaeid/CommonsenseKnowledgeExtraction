@@ -139,7 +139,7 @@ public class QuestionGenerator {
 
 	private boolean extractSemanticRelation(GraphPassingNode gpn) {
 		String[] split;
-
+		
 		x1_index = -1;
 		x2_index = -1;
 		verb2_index = -1;
@@ -148,7 +148,22 @@ public class QuestionGenerator {
 		Y2 = null;
 		y1_relation = null;
 		y2_relation = null;
-
+		for (String s : gpn.getAspGraph()) {
+			if (s.contains(verb1) && s.contains("instance_of")) {
+				split = s.split(",");
+				split = split[0].split("-");
+				split = split[0].split("\\(");
+				verb1 = split[split.length - 1];
+			}
+			if (s.contains(verb2) && s.contains("instance_of")) {
+				split = s.split(",");
+				System.out.println(verb2);
+				split = split[0].split("-");
+				verb2_index = Integer.parseInt(split[split.length - 1]);
+				split = split[0].split("\\(");
+				verb2 = split[split.length - 1];
+			}
+		}
 		for (String s : gpn.getAspGraph()) {
 			if (s.contains(verb1) && s.contains(x1_relation)) {
 				split = s.split("\\D+");
@@ -162,7 +177,6 @@ public class QuestionGenerator {
 			} else if (s.contains(verb2) && s.contains(x2_relation)) {
 				split = s.split("\\D+");
 				x2_index = Integer.parseInt(split[split.length - 1]) - 1;
-				verb2_index = Integer.parseInt(split[split.length - 2]) - 1;
 				// System.out.println(verb2_index);
 			} else if (s.contains(verb1) && s.contains("agent") || s.contains(verb1) && s.contains("recipient")) {
 				split = s.split(",");
