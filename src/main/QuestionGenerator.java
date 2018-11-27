@@ -1,6 +1,7 @@
 package main;
 
 import methods.SentenceParser;
+import module.graph.helper.ClassesResource;
 import module.graph.helper.GraphPassingNode;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientURI;
@@ -31,22 +32,29 @@ public class QuestionGenerator {
 
 			// Extract verb1, verb2, x1_relation, x2_relation
 			if (doc != null)
-				if (!extractKnowledge(doc))
+				if (!extractKnowledge(doc)) {
+					System.err.println("Failed to extract Semantic parametres from knowledge");
 					return false;
+				}
 
 			// Run parser on example sentence,
 			gpn = sp.parse(sentence);
 			// get x1_index, x2_index, y1, y1_index (agent or recp according to x1_relation)
 			// Needs semantic_graph, verb1, verb2, x1_relation, x2_relation
-			extractSemanticRelation(gpn);
+			if (!extractSemanticRelation(gpn)) {
+				System.err.println("Failed to extract Semantic Relations");
+				return false;
+			}
 			/*
 			 * System.out.println(X); System.out.println(x1_index); System.out.println(X);
 			 * System.out.println(x2_index); if(Y1 != "") { System.out.println(Y1);
 			 * System.out.println(y1_index); } if(Y2 != "") { System.out.println(Y2);
 			 * System.out.println(y2_index); }
 			 */
-			if (!isPerson(X, gpn, x1_index))
+			if (!isPerson(X, gpn, x1_index)) {
+				System.out.println("Entity " + X + " isn't agent");
 				return false;
+			}
 			if (!isPerson(Y1, gpn, y1_index))
 				y1_index = -1;
 
@@ -114,20 +122,31 @@ public class QuestionGenerator {
 
 	private boolean isPerson(String entity, GraphPassingNode gpn, int index) {
 		HashMap<String, ArrayList<String>> wordSenseMap = gpn.getWordSenseMap();
-		ArrayList<String> valueList;
-		index += 1;
-		// for(String s : gpn.getAspGraph()){
-		// System.out.println(s);
-		// }
-		valueList = wordSenseMap.get(entity + "_" + index);
-		if (valueList == null)
+		ClassesResource cr = gpn.getConClassRes();
+		HashMap<String, String> sm = cr.getSuperclassesMap();
+		index++;
+		String subClass = sm.get(entity + "-" + index);
+
+		if (subClass == null) {
+			System.err.println("failed to get subclass for entity " + entity + "-" + index);
 			return false;
-		if (valueList.get(1) == null)
-			return false;
-		return valueList.get(1).contains("person");
+		}
+		if (subClass.contains("person"))
+			return true;
+		System.err.println("subclass for entity " + entity + "-" + index + "is" + subClass);
+		return false;
 	}
 
-	private void extractSemanticRelation(GraphPassingNode gpn) {
+	private boolean extractSemanticRelation(GraphPassingNode gpn) {
+		x1_index = -1;
+		x2_index = -1;
+		verb2_index = -1;
+		X = null;
+		Y1 = null;
+		Y2 = null;
+		y1_relation = null;
+		y2_relation = null;
+
 		for (String s : gpn.getAspGraph()) {
 			if (s.contains(verb1) && s.contains(x1_relation)) {
 				split = s.split("\\D+");
@@ -135,7 +154,7 @@ public class QuestionGenerator {
 
 				split = s.split(",");
 				split = split[split.length - 1].split("-");
-				X = split[0].toLowerCase();
+				X = split[0];
 				// System.out.println(X);
 				// System.out.println(x1_index);
 			} else if (s.contains(verb2) && s.contains(x2_relation)) {
@@ -147,7 +166,7 @@ public class QuestionGenerator {
 				split = s.split(",");
 				split = split[split.length - 1].split("-");
 				if (!split[0].equals(X)) {
-					Y1 = split[0].toLowerCase();
+					Y1 = split[0];
 					if (s.contains("agent")) {
 						y1_relation = "agent";
 					} else {
@@ -162,7 +181,7 @@ public class QuestionGenerator {
 				split = s.split(",");
 				split = split[split.length - 1].split("-");
 				if (!split[0].equals(X)) {
-					Y2 = split[0].toLowerCase();
+					Y2 = split[0];
 					if (s.contains("agent")) {
 						y2_relation = "agent";
 					} else {
@@ -177,30 +196,39 @@ public class QuestionGenerator {
 
 		}
 
+		/* Validate extracted parameters */
+		if (x1_index == -1 || x2_index == -1 || verb2_index == -1 || X == null)
+			return false;
+		if (Y1 != null && y1_relation == null)
+			return false;
+		if (Y2 != null && y2_relation == null)
+			return false;
+
+		return true;
 	}
 
 	public static void main(String[] args) {
 		QuestionGenerator qg = new QuestionGenerator();
 
-//		qg.testExamples();
+		qg.testExamples();
 //		qg.printSemantic("Jon needs to think about that some more because Jon usually likes to tweak them before sending");
 //		qg.printSemantic("Mike was arrested by Paul because Mike was caught by Jan");
 
-		try {
-			FindIterable<Document> docs = qg.retrieveKonwledgeRecords();
-
-			for (Document doc : docs) {
-				if (qg.processKnowledge(doc)) {
-					System.out.println("* " + qg.sentence);
-					System.out.println("Q: " + qg.question);
-				} else {
-					System.out.println("failed to process knowledge");
-				}
-			}
-		} catch (JSONException e) {
-			e.printStackTrace();
-		}
-		qg.mongo_client.close();
+//		try {
+//			FindIterable<Document> docs = qg.retrieveKonwledgeRecords();
+//
+//			for (Document doc : docs) {
+//				if (qg.processKnowledge(doc)) {
+//					System.out.println("* " + qg.sentence);
+//					System.out.println("Q: " + qg.question);
+//				} else {
+//					System.out.println("failed to process knowledge");
+//				}
+//			}
+//		} catch (JSONException e) {
+//			e.printStackTrace();
+//		}
+//		qg.mongo_client.close();
 	}
 
 	private FindIterable<Document> retrieveKonwledgeRecords() throws JSONException {
@@ -232,7 +260,7 @@ public class QuestionGenerator {
 		verb1 = "arrest";
 		verb2 = "kill";
 		// qg.Y1 = "paul";
-		X = "mike";
+		// X = "Mike";
 		// qg.x1_index = 0;
 		// qg.x2_index = 6;
 		// qg.y1_index = 4;
@@ -252,7 +280,7 @@ public class QuestionGenerator {
 		sentence = "Mike was arrested by Paul because Mike was caught by Jan";
 		verb1 = "arrest";
 		verb2 = "catch";
-		X = "mike";
+		// X = "Mike";
 		x1_relation = "recipient";
 		x2_relation = "recipient";
 		if (processKnowledge(null)) {
@@ -265,23 +293,24 @@ public class QuestionGenerator {
 		verb1 = "think";
 		verb2 = "tweak";
 		// qg.Y1 = null;
-		X = "jon";
+		// X = "Jon";
 		// qg.x1_index = 0;
 		// qg.x2_index = 9;
 		// qg.y1_index = -1;
 		// qg.connective_index = 8;
 		// qg.verb1_index = 3;
 		// qg.verb2_index = 13;
-		x1_relation = "recipient";
-		x2_relation = "recipient";
-		// qg.y1_relation = "agent";
-		// qg.y2_relation = "agent";
+		x1_relation = "agent";
+		x2_relation = "agent";
+		// qg.y1_relation = "recipient";
+		// qg.y2_relation = "recipient";
 		if (processKnowledge(null)) {
 			System.out.println("* " + sentence);
 			System.out.println("Q: " + question);
 		}
 	}
 
+	@SuppressWarnings("unused")
 	private void printSemantic(String sentence) {
 		SentenceParser sp = SentenceParser.getInstance();
 		GraphPassingNode graphNode = sp.parse(sentence);
