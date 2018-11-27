@@ -2,8 +2,6 @@ package main;
 
 import methods.SentenceParser;
 import module.graph.helper.GraphPassingNode;
-import utils.DataBase;
-
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientURI;
 import com.mongodb.client.MongoDatabase;
@@ -14,7 +12,6 @@ import com.mongodb.client.MongoCollection;
 import java.util.*;
 
 import org.bson.Document;
-import org.bson.conversions.Bson;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -26,6 +23,7 @@ public class QuestionGenerator {
 	private boolean s1hasagent, s1hasrecp, s2hasagent, s2hasrecp;
 	private GraphPassingNode gpn;
 	private String[] split;
+	MongoClient mongo_client;
 
 	public boolean processKnowledge(Document doc) {
 		try {
@@ -56,7 +54,6 @@ public class QuestionGenerator {
 			modifySentence(); // Generate Sentence and Question.
 
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			System.err.println(e.getMessage());
 			e.printStackTrace();
 			return false;
@@ -131,7 +128,6 @@ public class QuestionGenerator {
 	}
 
 	private void extractSemanticRelation(GraphPassingNode gpn) {
-		// TODO Auto-generated method stub
 		for (String s : gpn.getAspGraph()) {
 			if (s.contains(verb1) && s.contains(x1_relation)) {
 				split = s.split("\\D+");
@@ -197,12 +193,14 @@ public class QuestionGenerator {
 				if (qg.processKnowledge(doc)) {
 					System.out.println("* " + qg.sentence);
 					System.out.println("Q: " + qg.question);
-					break;
+				} else {
+					System.out.println("failed to process knowledge");
 				}
 			}
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
+		qg.mongo_client.close();
 	}
 
 	private FindIterable<Document> retrieveKonwledgeRecords() throws JSONException {
@@ -212,7 +210,7 @@ public class QuestionGenerator {
 		String host_name = "localhost", db_name = "knetdb", db_coll_name = "maintable";
 		String client_url = "mongodb://" + host_name + ":" + port_no + "/" + db_name;
 		MongoClientURI uri = new MongoClientURI(client_url);
-		MongoClient mongo_client = new MongoClient(uri);
+		mongo_client = new MongoClient(uri);
 		MongoDatabase db = mongo_client.getDatabase(db_name);
 		MongoCollection<Document> coll = db.getCollection(db_coll_name);
 
