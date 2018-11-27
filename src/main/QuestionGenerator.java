@@ -117,9 +117,12 @@ public class QuestionGenerator {
 		} else {
 			throw new Exception("Unknown X relation");
 		}
-		for (i = verb2_index; i < tokens.length; i++) {
+		for (i = verb2_index; i < tokens.length - 1; i++) {
 			question += " " + tokens[i];
 		}
+		// Skip full stop. Otherwise add last word
+		if (!tokens[tokens.length - 1].equalsIgnoreCase("."))
+			question += " " + tokens[tokens.length - 1];
 		question += "?";
 	}
 
@@ -136,13 +139,13 @@ public class QuestionGenerator {
 		}
 		if (subClass.contains("person"))
 			return true;
-		System.err.println("subclass for entity " + entity + "-" + index + "is" + subClass);
+		System.err.println("subclass for entity " + entity + "-" + index + " is " + subClass);
 		return false;
 	}
 
 	private boolean extractSemanticRelation(GraphPassingNode gpn) {
 		String[] split;
-		
+
 		x1_index = -1;
 		x2_index = -1;
 		verb2_index = -1;
@@ -161,7 +164,7 @@ public class QuestionGenerator {
 			if (s.contains(verb2) && s.contains("instance_of")) {
 				split = s.split(",");
 				split = split[0].split("-");
-				verb2_index = Integer.parseInt(split[split.length - 1])-1;
+				verb2_index = Integer.parseInt(split[split.length - 1]) - 1;
 				split = split[0].split("\\(");
 				verb2 = split[split.length - 1];
 			}
@@ -228,6 +231,7 @@ public class QuestionGenerator {
 	public static void main(String[] args) {
 		QuestionGenerator qg = new QuestionGenerator();
 		BufferedWriter bw = null;
+		int i = 0;
 
 //		qg.testExamples();
 //		qg.printSemantic("Jon needs to think about that some more because Jon usually likes to tweak them before sending");
@@ -238,10 +242,11 @@ public class QuestionGenerator {
 			FindIterable<Document> docs = qg.retrieveKonwledgeRecords();
 
 			for (Document doc : docs) {
+				i++;
 				if (qg.processKnowledge(doc)) {
 					System.out.println("* " + qg.sentence);
 					System.out.println("Q: " + qg.question);
-					bw.write("* " + qg.sentence);
+					bw.write(i + "- " + qg.sentence);
 					bw.newLine();
 					bw.write("Q: " + qg.question);
 					bw.newLine();
