@@ -26,6 +26,7 @@ public class QuestionGenerator {
 	private boolean s1hasagent, s1hasrecp, s2hasagent, s2hasrecp;
 	private GraphPassingNode gpn;
 	private String[] split;
+	MongoClient mongo_client;
 
 	public boolean processKnowledge(Document doc) {
 		try {
@@ -207,7 +208,7 @@ public class QuestionGenerator {
 		String host_name = "localhost", db_name = "knetdb", db_coll_name = "maintable";
 		String client_url = "mongodb://" + host_name + ":" + port_no + "/" + db_name;
 		MongoClientURI uri = new MongoClientURI(client_url);
-		MongoClient mongo_client = new MongoClient(uri);
+		mongo_client = new MongoClient(uri);
 		MongoDatabase db = mongo_client.getDatabase(db_name);
 		MongoCollection<Document> coll = db.getCollection(db_coll_name);
 
