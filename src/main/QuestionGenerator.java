@@ -270,6 +270,8 @@ public class QuestionGenerator {
 					bw.newLine();
 					bw.write("Q: " + qg.question);
 					bw.newLine();
+					bw.write("a) Tom\t b) John\nc) None\t d) Unclear");
+					bw.newLine();
 					bw.newLine();
 					bw.flush();
 				} else {
